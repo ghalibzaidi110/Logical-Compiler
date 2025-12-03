@@ -336,8 +336,17 @@ class CompilerGUI:
         python_code = self.extract_python_code()
         
         if not python_code:
-            messagebox.showwarning("No Python Code", "No Python code found. Please compile first.")
+            messagebox.showwarning("No Python Code", 
+                "No Python code found. Please compile first.\n\n"
+                "Make sure you have:\n"
+                "1. Entered circuit code\n"
+                "2. Clicked 'Compile' button\n"
+                "3. Compilation completed successfully")
             return
+        
+        # Show what we're about to execute (for debugging)
+        print(f"DEBUG: Extracted {len(python_code)} characters of Python code")
+        print(f"DEBUG: First 200 chars: {python_code[:200]}")
         
         self.update_status("Executing Python code...")
         
@@ -357,6 +366,13 @@ class CompilerGUI:
                         text=True,
                         timeout=10  # 10 second timeout
                     )
+                    
+                    # Debug output
+                    print(f"DEBUG: Execution return code: {result.returncode}")
+                    print(f"DEBUG: stdout length: {len(result.stdout)}")
+                    print(f"DEBUG: stderr length: {len(result.stderr)}")
+                    if result.stdout:
+                        print(f"DEBUG: First 200 chars of stdout: {result.stdout[:200]}")
                     
                     # Update UI in main thread
                     self.root.after(0, self.show_execution_results, result.stdout, result.stderr, result.returncode)
