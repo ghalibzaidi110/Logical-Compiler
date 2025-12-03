@@ -295,24 +295,40 @@ class CompilerGUI:
     def extract_python_code(self):
         """Extract Python code from output."""
         output = self.output_text_area.get('1.0', tk.END)
+        
+        # Check for Python code marker
         if "Generated Python Code" not in output:
             return None
         
-        # Extract Python code
+        # Extract Python code - find the marker and get everything after it
         lines = output.split('\n')
         python_lines = []
-        in_python = False
-        for line in lines:
+        found_marker = False
+        
+        for i, line in enumerate(lines):
+            # Look for the marker line
             if "Generated Python Code" in line:
-                in_python = True
-                continue  # Skip the separator line
-            if in_python:
-                # Stop at empty lines or end
-                if line.strip() == '' and python_lines:
-                    break
+                found_marker = True
+                # Start capturing from the next line
+                continue
+            
+            # If we found the marker, capture all subsequent lines
+            if found_marker:
                 python_lines.append(line)
         
+        # Join all lines and clean up
         python_code = '\n'.join(python_lines).strip()
+        
+        # Remove trailing empty lines but keep the code structure
+        while python_code.endswith('\n\n'):
+            python_code = python_code.rstrip('\n')
+        
+        # Debug: print what we extracted (can remove later)
+        if not python_code:
+            print("DEBUG: No Python code extracted")
+            print(f"DEBUG: Output contains marker: {'Generated Python Code' in output}")
+            print(f"DEBUG: First 500 chars of output: {output[:500]}")
+        
         return python_code if python_code else None
     
     def execute_python(self):
@@ -366,7 +382,7 @@ class CompilerGUI:
         # Create results window
         results_window = tk.Toplevel(self.root)
         results_window.title("Execution Results")
-        results_window.geometry("800x600")
+        results_window.geometry("900x700")
         results_window.configure(bg='#1e1e1e')
         
         # Header
@@ -374,10 +390,10 @@ class CompilerGUI:
         header.pack(fill=tk.X)
         
         if returncode == 0:
-            status_label = tk.Label(header, text="✓ Execution Successful", 
+            status_label = tk.Label(header, text="[OK] Execution Successful", 
                                    bg='#2d2d2d', fg='#4ec9b0', font=('Arial', 12, 'bold'))
         else:
-            status_label = tk.Label(header, text="✗ Execution Failed", 
+            status_label = tk.Label(header, text="[ERROR] Execution Failed", 
                                    bg='#2d2d2d', fg='#f48771', font=('Arial', 12, 'bold'))
         status_label.pack()
         
@@ -386,7 +402,7 @@ class CompilerGUI:
         output_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         output_text = scrolledtext.ScrolledText(output_frame, bg='#1e1e1e', fg='#d4d4d4',
-                                                font=('Consolas', 10), wrap=tk.WORD,
+                                                font=('Consolas', 11), wrap=tk.WORD,
                                                 relief=tk.FLAT, bd=0)
         output_text.pack(fill=tk.BOTH, expand=True)
         
@@ -394,22 +410,29 @@ class CompilerGUI:
         if stdout:
             output_text.insert(tk.END, "=== Standard Output ===\n", 'header')
             output_text.insert(tk.END, stdout, 'output')
-            output_text.insert(tk.END, "\n\n")
+            if not stdout.endswith('\n'):
+                output_text.insert(tk.END, "\n")
         
         # Show stderr if any
         if stderr:
+            if stdout:
+                output_text.insert(tk.END, "\n")
             output_text.insert(tk.END, "=== Error Output ===\n", 'error_header')
             output_text.insert(tk.END, stderr, 'error')
+            if not stderr.endswith('\n'):
+                output_text.insert(tk.END, "\n")
         
         if not stdout and not stderr:
             output_text.insert(tk.END, "No output generated.\n", 'output')
+            output_text.insert(tk.END, "The code executed but produced no output.\n", 'output')
         
         # Configure text tags for colors
-        output_text.tag_config('header', foreground='#4ec9b0', font=('Consolas', 10, 'bold'))
+        output_text.tag_config('header', foreground='#4ec9b0', font=('Consolas', 11, 'bold'))
         output_text.tag_config('output', foreground='#d4d4d4')
-        output_text.tag_config('error_header', foreground='#f48771', font=('Consolas', 10, 'bold'))
+        output_text.tag_config('error_header', foreground='#f48771', font=('Consolas', 11, 'bold'))
         output_text.tag_config('error', foreground='#f48771')
         
+        # Make text area read-only but allow scrolling
         output_text.config(state=tk.DISABLED)
         
         # Buttons
@@ -420,7 +443,9 @@ class CompilerGUI:
                  bg='#3c3c3c', fg='white', font=('Arial', 10), width=10).pack(side=tk.RIGHT, padx=5)
         
         def save_results():
+            output_text.config(state=tk.NORMAL)
             content = output_text.get('1.0', tk.END)
+            output_text.config(state=tk.DISABLED)
             filename = filedialog.asksaveasfilename(
                 title="Save Execution Results",
                 defaultextension=".txt",
@@ -664,6 +689,7 @@ class CompilerGUI:
             self.output_text_area.insert(tk.END, "=" * 60 + "\n\n")
             self.output_text_area.insert(tk.END, "--- Generated Python Code ---\n\n")
             self.output_text_area.insert(tk.END, python_code)
+            self.output_text_area.insert(tk.END, "\n")  # Ensure newline at end
             
             self.update_status("Compilation successful!")
             
