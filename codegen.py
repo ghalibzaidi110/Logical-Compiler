@@ -58,7 +58,9 @@ class CodeGenerator:
     def generate_truth_table(self, inputs: List[str], outputs: List[str]) -> str:
         """Generate code to print truth table."""
         code = "# Truth Table\n"
-        code += f'print("{ "  ".join(inputs)} || { "  ".join(outputs)}")\n'
+        input_header = '  '.join(inputs)
+        output_header = '  '.join(outputs)
+        code += f'print("{input_header} || {output_header}")\n'
         code += 'print("-" * 40)\n\n'
         
         num_inputs = len(inputs)
@@ -71,11 +73,12 @@ class CodeGenerator:
             
             # Handle single vs multiple outputs
             if len(outputs) == 1:
-                code += f'print(f"{ "  ".join(values)} || {{result}}")\n'
-            else:
-                output_str = '  '.join([f'{{result[{i}]}}' for i in range(len(outputs))])
                 values_str = '  '.join(values)
-                code += f'print(f"{values_str} || {output_str}".format(result=result))\n'
+                code += f'print(f"{values_str} || {{result}}")\n'
+            else:
+                output_str = '  '.join([f'{{result[{j}]}}' for j in range(len(outputs))])
+                values_str = '  '.join(values)
+                code += f'print(f"{values_str} || {output_str}")\n'
         
         return code
     
