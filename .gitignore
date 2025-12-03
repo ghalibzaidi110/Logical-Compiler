@@ -43,3 +43,9 @@ artifacts/*.pdf
 artifacts/*.png
 artifacts/*.jpg
 
+# Generated output files
+output.py
+*_output.py
+*.pyc
+__pycache__/
+
