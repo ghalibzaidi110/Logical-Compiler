@@ -1,12 +1,11 @@
 CIRCUIT Comparator1Bit {
   INPUT A, B;
   OUTPUT Equal, Greater, Less;
-  WIRE notA, notB, xor1, notXor;
+  WIRE notA, notB, xor1;
   notA = NOT(A);
   notB = NOT(B);
   xor1 = XOR(A, B);
-  notXor = NOT(xor1);
-  Equal = notXor;
+  Equal = NOT(xor1);
   Greater = AND(A, notB);
   Less = AND(notA, B);
 }
