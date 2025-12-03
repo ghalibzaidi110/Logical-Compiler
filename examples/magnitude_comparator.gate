@@ -1,13 +1,13 @@
 CIRCUIT MagnitudeComparator {
   INPUT A, B;
   OUTPUT A_GT_B, A_LT_B, A_EQ_B;
-  WIRE notA, notB, and1, and2;
+  WIRE notA, notB, xor1, notXor;
   notA = NOT(A);
   notB = NOT(B);
-  and1 = AND(A, notB);
-  A_GT_B = and1;
-  and2 = AND(notA, B);
-  A_LT_B = and2;
-  A_EQ_B = XNOR(A, B);
+  A_GT_B = AND(A, notB);
+  A_LT_B = AND(notA, B);
+  xor1 = XOR(A, B);
+  notXor = NOT(xor1);
+  A_EQ_B = notXor;
 }
 
