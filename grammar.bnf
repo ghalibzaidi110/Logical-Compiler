@@ -1,0 +1,154 @@
+# Logic Gate Architect - Formal BNF Grammar Specification
+
+## Terminal Symbols (Tokens)
+
+<keyword> ::= CIRCUIT | INPUT | OUTPUT | WIRE | AND | OR | XOR | NAND | NOR | NOT
+<identifier> ::= [a-zA-Z_][a-zA-Z0-9_]*
+<lbrace> ::= {
+<rbrace> ::= }
+<lparen> ::= (
+<rparen> ::= )
+<semicolon> ::= ;
+<comma> ::= ,
+<equals> ::= =
+
+## Non-Terminal Symbols
+
+<program> ::= CIRCUIT <identifier> <lbrace> <declarations> <gates> <rbrace>
+
+<declarations> ::= <declaration> <declarations>
+                 | <declaration>
+                 | ε
+
+<declaration> ::= <declaration_keyword> <identifier_list> <semicolon>
+
+<declaration_keyword> ::= INPUT
+                        | OUTPUT
+                        | WIRE
+
+<identifier_list> ::= <identifier> <identifier_list_tail>
+
+<identifier_list_tail> ::= <comma> <identifier> <identifier_list_tail>
+                          | ε
+
+<gates> ::= <gate> <gates>
+          | <gate>
+          | ε
+
+<gate> ::= <identifier> <equals> <gate_type> <lparen> <gate_inputs> <rparen> <semicolon>
+
+<gate_type> ::= AND
+              | OR
+              | XOR
+              | NAND
+              | NOR
+              | NOT
+
+<gate_inputs> ::= <identifier> <gate_inputs_tail>
+
+<gate_inputs_tail> ::= <comma> <identifier> <gate_inputs_tail>
+                      | ε
+
+## Grammar Notes
+
+1. **Start Symbol:** <program>
+
+2. **Precedence Rules:**
+   - Keywords must be matched before identifiers (lexical level)
+   - Declarations must come before gates (syntactic level)
+
+3. **Semantic Constraints (not in BNF):**
+   - NOT gate requires exactly 1 input
+   - AND, OR, XOR, NAND, NOR gates require exactly 2 inputs
+   - All identifiers must be declared before use
+   - OUTPUT identifiers must be assigned a value
+   - No combinational cycles allowed
+
+## Example Derivation
+
+**Input:**
+```
+CIRCUIT HalfAdder {
+  INPUT A, B;
+  OUTPUT Sum, Carry;
+  Sum = XOR(A, B);
+  Carry = AND(A, B);
+}
+```
+
+**Derivation Steps:**
+```
+<program>
+=> CIRCUIT <identifier> <lbrace> <declarations> <gates> <rbrace>
+=> CIRCUIT HalfAdder { <declarations> <gates> }
+=> CIRCUIT HalfAdder { <declaration> <declarations> <gates> }
+=> CIRCUIT HalfAdder { INPUT <identifier_list> ; <declarations> <gates> }
+=> CIRCUIT HalfAdder { INPUT A, B ; <declarations> <gates> }
+=> CIRCUIT HalfAdder { INPUT A, B ; OUTPUT <identifier_list> ; <gates> }
+=> CIRCUIT HalfAdder { INPUT A, B ; OUTPUT Sum, Carry ; <gates> }
+=> CIRCUIT HalfAdder { INPUT A, B ; OUTPUT Sum, Carry ; <gate> <gates> }
+=> CIRCUIT HalfAdder { INPUT A, B ; OUTPUT Sum, Carry ; Sum = XOR(A, B) ; <gates> }
+=> CIRCUIT HalfAdder { INPUT A, B ; OUTPUT Sum, Carry ; Sum = XOR(A, B) ; Carry = AND(A, B) ; }
+```
+
+## EBNF Alternative (Extended BNF)
+
+```
+program = "CIRCUIT" identifier "{" declarations gates "}" ;
+
+declarations = { declaration } ;
+
+declaration = ( "INPUT" | "OUTPUT" | "WIRE" ) identifier_list ";" ;
+
+identifier_list = identifier { "," identifier } ;
+
+gates = { gate } ;
+
+gate = identifier "=" gate_type "(" gate_inputs ")" ";" ;
+
+gate_type = "AND" | "OR" | "XOR" | "NAND" | "NOR" | "NOT" ;
+
+gate_inputs = identifier { "," identifier } ;
+```
+
+## Lexical Grammar (Regular Expressions)
+
+```
+KEYWORD      := \b(CIRCUIT|INPUT|OUTPUT|WIRE|AND|OR|XOR|NAND|NOR|NOT)\b
+IDENTIFIER   := [a-zA-Z_][a-zA-Z0-9_]*
+LBRACE       := \{
+RBRACE       := \}
+LPAREN       := \(
+RPAREN       := \)
+SEMICOLON    := ;
+COMMA        := ,
+EQUALS       := =
+WHITESPACE   := [ \t]+
+NEWLINE      := \n
+```
+
+## Grammar Properties
+
+- **Type:** Context-Free Grammar (CFG)
+- **Parsing Method:** Recursive Descent (LL(1))
+- **Ambiguity:** None (unambiguous grammar)
+- **Left Recursion:** None
+- **Lookahead:** 1 token (LL(1))
+
+## Syntax Rules Summary
+
+1. A program starts with `CIRCUIT` keyword followed by circuit name
+2. Circuit body is enclosed in braces `{ }`
+3. Declarations (INPUT, OUTPUT, WIRE) come first
+4. Each declaration ends with semicolon
+5. Gate assignments follow declarations
+6. Each gate assignment ends with semicolon
+7. Gate inputs are comma-separated
+8. Gate inputs are enclosed in parentheses
+
+---
+
+**Grammar Version:** 1.0  
+**Last Updated:** December 2024  
+**Language:** Logic Gate Architect DSL
+
