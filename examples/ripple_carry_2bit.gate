@@ -1,15 +1,15 @@
 CIRCUIT RippleCarry2Bit {
   INPUT A0, A1, B0, B1, Cin;
   OUTPUT S0, S1, Cout;
-  WIRE c1;
-  WIRE ha0_sum, ha0_carry, ha1_sum, ha1_carry;
+  WIRE ha0_sum, ha0_carry, c1, ha1_sum, ha1_carry, and_temp1, and_temp2;
   ha0_sum = XOR(A0, B0);
   ha0_carry = AND(A0, B0);
   S0 = XOR(ha0_sum, Cin);
-  c1 = OR(ha0_carry, AND(ha0_sum, Cin));
+  and_temp1 = AND(ha0_sum, Cin);
+  c1 = OR(ha0_carry, and_temp1);
   ha1_sum = XOR(A1, B1);
   ha1_carry = AND(A1, B1);
   S1 = XOR(ha1_sum, c1);
-  Cout = OR(ha1_carry, AND(ha1_sum, c1));
+  and_temp2 = AND(ha1_sum, c1);
+  Cout = OR(ha1_carry, and_temp2);
 }
-
