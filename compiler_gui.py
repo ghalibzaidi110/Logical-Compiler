@@ -12,6 +12,9 @@ import sys
 import subprocess
 import tempfile
 import os
+import subprocess
+import tempfile
+import os
 
 # Import compiler modules
 from lexer import Lexer
@@ -288,6 +291,153 @@ class CompilerGUI:
                 self.update_status(f"Python code saved: {Path(filename).name}")
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save Python code:\n{e}")
+    
+    def extract_python_code(self):
+        """Extract Python code from output."""
+        output = self.output_text_area.get('1.0', tk.END)
+        if "Generated Python Code" not in output:
+            return None
+        
+        # Extract Python code
+        lines = output.split('\n')
+        python_lines = []
+        in_python = False
+        for line in lines:
+            if "Generated Python Code" in line:
+                in_python = True
+                continue  # Skip the separator line
+            if in_python:
+                # Stop at empty lines or end
+                if line.strip() == '' and python_lines:
+                    break
+                python_lines.append(line)
+        
+        python_code = '\n'.join(python_lines).strip()
+        return python_code if python_code else None
+    
+    def execute_python(self):
+        """Execute the generated Python code and show results."""
+        python_code = self.extract_python_code()
+        
+        if not python_code:
+            messagebox.showwarning("No Python Code", "No Python code found. Please compile first.")
+            return
+        
+        self.update_status("Executing Python code...")
+        
+        # Run in a separate thread to avoid blocking UI
+        def run_code():
+            try:
+                # Create temporary file
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+                    f.write(python_code)
+                    temp_file = f.name
+                
+                try:
+                    # Execute Python code
+                    result = subprocess.run(
+                        [sys.executable, temp_file],
+                        capture_output=True,
+                        text=True,
+                        timeout=10  # 10 second timeout
+                    )
+                    
+                    # Update UI in main thread
+                    self.root.after(0, self.show_execution_results, result.stdout, result.stderr, result.returncode)
+                    
+                finally:
+                    # Clean up temporary file
+                    try:
+                        os.unlink(temp_file)
+                    except:
+                        pass
+                        
+            except subprocess.TimeoutExpired:
+                self.root.after(0, lambda: messagebox.showerror("Timeout", "Code execution timed out (10 seconds)."))
+            except Exception as e:
+                self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to execute code:\n{e}"))
+        
+        # Start execution in background thread
+        thread = threading.Thread(target=run_code, daemon=True)
+        thread.start()
+    
+    def show_execution_results(self, stdout, stderr, returncode):
+        """Display execution results in a new window."""
+        # Create results window
+        results_window = tk.Toplevel(self.root)
+        results_window.title("Execution Results")
+        results_window.geometry("800x600")
+        results_window.configure(bg='#1e1e1e')
+        
+        # Header
+        header = tk.Frame(results_window, bg='#2d2d2d', pady=10)
+        header.pack(fill=tk.X)
+        
+        if returncode == 0:
+            status_label = tk.Label(header, text="✓ Execution Successful", 
+                                   bg='#2d2d2d', fg='#4ec9b0', font=('Arial', 12, 'bold'))
+        else:
+            status_label = tk.Label(header, text="✗ Execution Failed", 
+                                   bg='#2d2d2d', fg='#f48771', font=('Arial', 12, 'bold'))
+        status_label.pack()
+        
+        # Output area
+        output_frame = tk.Frame(results_window, bg='#1e1e1e')
+        output_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        output_text = scrolledtext.ScrolledText(output_frame, bg='#1e1e1e', fg='#d4d4d4',
+                                                font=('Consolas', 10), wrap=tk.WORD,
+                                                relief=tk.FLAT, bd=0)
+        output_text.pack(fill=tk.BOTH, expand=True)
+        
+        # Show stdout
+        if stdout:
+            output_text.insert(tk.END, "=== Standard Output ===\n", 'header')
+            output_text.insert(tk.END, stdout, 'output')
+            output_text.insert(tk.END, "\n\n")
+        
+        # Show stderr if any
+        if stderr:
+            output_text.insert(tk.END, "=== Error Output ===\n", 'error_header')
+            output_text.insert(tk.END, stderr, 'error')
+        
+        if not stdout and not stderr:
+            output_text.insert(tk.END, "No output generated.\n", 'output')
+        
+        # Configure text tags for colors
+        output_text.tag_config('header', foreground='#4ec9b0', font=('Consolas', 10, 'bold'))
+        output_text.tag_config('output', foreground='#d4d4d4')
+        output_text.tag_config('error_header', foreground='#f48771', font=('Consolas', 10, 'bold'))
+        output_text.tag_config('error', foreground='#f48771')
+        
+        output_text.config(state=tk.DISABLED)
+        
+        # Buttons
+        btn_frame = tk.Frame(results_window, bg='#1e1e1e')
+        btn_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        tk.Button(btn_frame, text="Close", command=results_window.destroy,
+                 bg='#3c3c3c', fg='white', font=('Arial', 10), width=10).pack(side=tk.RIGHT, padx=5)
+        
+        def save_results():
+            content = output_text.get('1.0', tk.END)
+            filename = filedialog.asksaveasfilename(
+                title="Save Execution Results",
+                defaultextension=".txt",
+                filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
+            )
+            if filename:
+                try:
+                    with open(filename, 'w') as f:
+                        f.write(content)
+                    messagebox.showinfo("Saved", f"Results saved to {Path(filename).name}")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to save:\n{e}")
+        
+        tk.Button(btn_frame, text="Save Results", command=save_results,
+                 bg='#0078d4', fg='white', font=('Arial', 10), width=12).pack(side=tk.RIGHT, padx=5)
+        
+        self.update_status("Execution complete!")
     
     def show_phase(self, phase_id):
         """Show details for a specific phase."""
