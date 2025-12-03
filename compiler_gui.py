@@ -9,6 +9,9 @@ from tkinter import ttk, filedialog, messagebox, scrolledtext
 import threading
 from pathlib import Path
 import sys
+import subprocess
+import tempfile
+import os
 
 # Import compiler modules
 from lexer import Lexer
@@ -142,6 +145,8 @@ class CompilerGUI:
         output_btn_frame = tk.Frame(output_header, bg='#2d2d2d')
         output_btn_frame.pack(side=tk.RIGHT)
         
+        tk.Button(output_btn_frame, text="Execute", command=self.execute_python,
+                 bg='#107c10', fg='white', font=('Arial', 9, 'bold'), width=10).pack(side=tk.LEFT, padx=2)
         tk.Button(output_btn_frame, text="Save Output", command=self.save_output,
                  bg='#0078d4', fg='white', font=('Arial', 9), width=10).pack(side=tk.LEFT, padx=2)
         tk.Button(output_btn_frame, text="Save Python", command=self.save_python,
