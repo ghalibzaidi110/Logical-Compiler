@@ -6,7 +6,7 @@ A complete 6-phase compiler implementation for a domain-specific language (DSL) 
 
 **Course:** CS4031 - Compiler Construction  
 **Language:** Logic Gate Architect DSL  
-**Implementation:** TypeScript/React  
+**Implementation:** Python (CLI + GUI)  
 **Status:** Complete with all required deliverables
 
 ## Features
@@ -19,42 +19,41 @@ A complete 6-phase compiler implementation for a domain-specific language (DSL) 
 - Phase 5: Optimization (Constant Folding, Dead Code Elimination)
 - Phase 6: Code Generation (Python Output)
 
-✅ **Modern Web Interface:**
+✅ **Two Interfaces:**
+- **CLI Version** (`compiler.py`) - Command-line interface for submission
+- **GUI Version** (`compiler_gui.py`) - Modern graphical interface for demo
+
+## Quick Start
+
+### GUI Version (Recommended for Demo)
+
+```bash
+python compiler_gui.py
+```
+
+Features:
 - Interactive code editor
 - Real-time compilation
 - Phase-by-phase visualization
 - File I/O support
+- Test case buttons
 
-✅ **Complete Documentation:**
-- Formal BNF grammar specification
-- Phase-by-phase documentation
-- Hand-drawn artifact references
-- Project reflection
+### CLI Version (For Submission)
 
-## Quick Start
-
-### Prerequisites
-- Node.js 16+ and npm/yarn
-- React 18+
-
-### Installation
 ```bash
-# Clone repository
-git clone <repository-url>
-cd "Logic Gates Compiler"
+# Basic compilation
+python compiler.py examples/halfadder.gate
 
-# Install dependencies (if needed)
-npm install
+# Save to file
+python compiler.py examples/halfadder.gate -o output.py
+python output.py
+
+# Verbose mode (see all phases)
+python compiler.py examples/halfadder.gate -v
+
+# Show detailed information
+python compiler.py examples/halfadder.gate -v --tokens --ast --symbols --quads
 ```
-
-### Usage
-1. Open `logic_gate_compiler.tsx` in your React application
-2. Use the interactive UI to:
-   - Load `.gate` files
-   - Edit source code
-   - Compile circuits
-   - View all compilation phases
-   - Save generated Python code
 
 ## Example Circuit
 
@@ -71,36 +70,32 @@ CIRCUIT HalfAdder {
 
 ```
 Logic Gates Compiler/
-├── logic_gate_compiler.tsx    # Main compiler implementation
-├── grammar.bnf                 # Formal BNF grammar
-├── reflection.md               # Project reflection
-├── complete_project_report.md  # Full project report
-├── phase1_lexer_doc.md         # Lexical analysis docs
-├── phase3_semantic_doc.md      # Semantic analysis docs
-├── phases_456_doc.md           # ICG, Optimization, CodeGen docs
-├── artifacts/                  # Hand-drawn artifact references
+├── compiler.py              # CLI compiler (main submission)
+├── compiler_gui.py          # GUI compiler (demo)
+├── lexer.py                 # Phase 1: Lexical Analysis
+├── parser.py                # Phase 2: Syntax Analysis
+├── semantic.py              # Phase 3: Semantic Analysis
+├── icg.py                   # Phase 4: Intermediate Code Generation
+├── optimizer.py             # Phase 5: Optimization
+├── codegen.py               # Phase 6: Code Generation
+├── grammar.bnf               # Formal BNF grammar
+├── reflection.md            # Project reflection
+├── examples/                # Test circuit files
+│   ├── basic_and.gate
+│   ├── halfadder.gate
+│   └── fulladder.gate
+├── artifacts/               # Hand-drawn artifact references
 │   ├── DFA_IDENTIFIER.md
 │   ├── PARSE_TREE.md
 │   └── SYMBOL_TABLE.md
-└── .gitignore
+└── README.md
 ```
-
-## Deliverables Checklist
-
-- [x] Language specification (BNF grammar)
-- [x] All 6 compiler phases implemented
-- [x] Handwritten artifact references (DFA, parse tree, symbol table)
-- [x] Reflection document
-- [x] Git repository
-- [x] File I/O capability
-- [x] 3+ test cases
-- [x] Complete documentation
 
 ## Test Cases
 
 1. **Basic AND Gate** - Simple 2-input AND gate
 2. **Half Adder** - Arithmetic circuit with multiple outputs
-3. **Cycle Detection** - Error detection for combinational loops
+3. **Full Adder** - Complex circuit with wires
 
 ## Generated Output
 
@@ -117,12 +112,39 @@ print("A  B || Sum  Carry")
 # ... complete truth table
 ```
 
-## Documentation
+## CLI Options
 
-- **Grammar:** See `grammar.bnf` for formal BNF specification
-- **Phases:** See phase-specific documentation files
-- **Artifacts:** See `artifacts/` directory for hand-drawing instructions
-- **Report:** See `complete_project_report.md` for full details
+```
+python compiler.py <input_file> [options]
+
+Options:
+  -o, --output <file>    Write generated code to file
+  -v, --verbose          Show detailed compilation steps
+  -t, --tokens           Print token stream
+  -a, --ast              Print abstract syntax tree
+  -s, --symbols          Print symbol table
+  -q, --quads            Print quadruples
+  --no-optimize          Disable optimization
+  -h, --help             Show help message
+```
+
+## Requirements
+
+- Python 3.8 or higher
+- tkinter (usually included with Python, for GUI)
+
+## Deliverables Checklist
+
+- [x] Language specification (BNF grammar)
+- [x] All 6 compiler phases implemented
+- [x] CLI version (Python)
+- [x] GUI version (Python/tkinter)
+- [x] Handwritten artifact references
+- [x] Reflection document
+- [x] Git repository
+- [x] File I/O capability
+- [x] 3+ test cases
+- [x] Complete documentation
 
 ## License
 
@@ -131,6 +153,4 @@ Academic project for CS4031 - Compiler Construction
 ---
 
 **Team:** 3 Members  
-**Semester:** Fall 2025  
-**Institution:** [Your University]
-
+**Semester:** Fall 2025

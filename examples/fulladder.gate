@@ -1,0 +1,12 @@
+CIRCUIT FullAdder {
+  INPUT A, B, Cin;
+  OUTPUT Sum, Cout;
+  WIRE xor1, and1, and2;
+  
+  xor1 = XOR(A, B);
+  Sum = XOR(xor1, Cin);
+  and1 = AND(A, B);
+  and2 = AND(xor1, Cin);
+  Cout = OR(and1, and2);
+}
+

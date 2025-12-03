@@ -1,0 +1,6 @@
+CIRCUIT BasicAND {
+  INPUT A, B;
+  OUTPUT Z;
+  Z = AND(A, B);
+}
+

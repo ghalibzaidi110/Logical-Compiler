@@ -1,0 +1,7 @@
+CIRCUIT HalfAdder {
+  INPUT A, B;
+  OUTPUT Sum, Carry;
+  Sum = XOR(A, B);
+  Carry = AND(A, B);
+}
+
