@@ -1,0 +1,6 @@
+CIRCUIT BasicNAND {
+  INPUT A, B;
+  OUTPUT Z;
+  Z = NAND(A, B);
+}
+

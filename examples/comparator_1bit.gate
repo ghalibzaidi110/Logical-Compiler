@@ -1,0 +1,13 @@
+CIRCUIT Comparator1Bit {
+  INPUT A, B;
+  OUTPUT Equal, Greater, Less;
+  WIRE notA, notB, and1, and2;
+  notA = NOT(A);
+  notB = NOT(B);
+  Equal = XNOR(A, B);
+  and1 = AND(A, notB);
+  Greater = and1;
+  and2 = AND(notA, B);
+  Less = and2;
+}
+

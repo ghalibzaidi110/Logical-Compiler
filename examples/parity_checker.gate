@@ -1,0 +1,10 @@
+CIRCUIT ParityChecker {
+  INPUT A, B, C, D;
+  OUTPUT Parity;
+  WIRE xor1, xor2, xor3;
+  xor1 = XOR(A, B);
+  xor2 = XOR(xor1, C);
+  xor3 = XOR(xor2, D);
+  Parity = xor3;
+}
+

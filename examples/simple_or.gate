@@ -1,0 +1,6 @@
+CIRCUIT BasicOR {
+  INPUT A, B;
+  OUTPUT Z;
+  Z = OR(A, B);
+}
+

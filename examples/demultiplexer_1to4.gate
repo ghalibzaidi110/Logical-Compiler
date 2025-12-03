@@ -1,0 +1,16 @@
+CIRCUIT Demultiplexer1to4 {
+  INPUT Input, S0, S1;
+  OUTPUT Y0, Y1, Y2, Y3;
+  WIRE notS0, notS1, and0, and1, and2, and3;
+  notS0 = NOT(S0);
+  notS1 = NOT(S1);
+  and0 = AND(Input, AND(notS0, notS1));
+  Y0 = and0;
+  and1 = AND(Input, AND(notS0, S1));
+  Y1 = and1;
+  and2 = AND(Input, AND(S0, notS1));
+  Y2 = and2;
+  and3 = AND(Input, AND(S0, S1));
+  Y3 = and3;
+}
+

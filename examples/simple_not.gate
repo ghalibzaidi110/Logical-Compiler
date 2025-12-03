@@ -1,0 +1,6 @@
+CIRCUIT Inverter {
+  INPUT A;
+  OUTPUT Z;
+  Z = NOT(A);
+}
+

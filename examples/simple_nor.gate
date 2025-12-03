@@ -1,0 +1,6 @@
+CIRCUIT BasicNOR {
+  INPUT A, B;
+  OUTPUT Z;
+  Z = NOR(A, B);
+}
+

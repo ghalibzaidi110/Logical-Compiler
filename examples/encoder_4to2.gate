@@ -1,0 +1,10 @@
+CIRCUIT Encoder4to2 {
+  INPUT D0, D1, D2, D3;
+  OUTPUT A, B;
+  WIRE or1, or2;
+  or1 = OR(D1, D3);
+  A = or1;
+  or2 = OR(D2, D3);
+  B = or2;
+}
+

@@ -1,0 +1,11 @@
+CIRCUIT XORFromBasic {
+  INPUT A, B;
+  OUTPUT Z;
+  WIRE notA, notB, and1, and2;
+  notA = NOT(A);
+  notB = NOT(B);
+  and1 = AND(A, notB);
+  and2 = AND(notA, B);
+  Z = OR(and1, and2);
+}
+

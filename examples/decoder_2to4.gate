@@ -1,0 +1,12 @@
+CIRCUIT Decoder2to4 {
+  INPUT A, B;
+  OUTPUT D0, D1, D2, D3;
+  WIRE notA, notB;
+  notA = NOT(A);
+  notB = NOT(B);
+  D0 = AND(notA, notB);
+  D1 = AND(notA, B);
+  D2 = AND(A, notB);
+  D3 = AND(A, B);
+}
+

@@ -1,0 +1,10 @@
+CIRCUIT Multiplexer2to1 {
+  INPUT A, B, S;
+  OUTPUT Z;
+  WIRE notS, and1, and2;
+  notS = NOT(S);
+  and1 = AND(A, notS);
+  and2 = AND(B, S);
+  Z = OR(and1, and2);
+}
+
