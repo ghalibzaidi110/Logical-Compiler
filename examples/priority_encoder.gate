@@ -1,12 +1,14 @@
 CIRCUIT PriorityEncoder {
   INPUT D0, D1, D2, D3;
   OUTPUT A, B, Valid;
-  WIRE or1, or2, or3;
+  WIRE or1, or2, or3, or4, or5;
   or3 = OR(D2, D3);
   B = or3;
   or1 = OR(D1, D3);
   or2 = OR(D1, D2);
   A = OR(or1, or2);
-  Valid = OR(D0, OR(D1, OR(D2, D3)));
+  or4 = OR(D2, D3);
+  or5 = OR(D1, or4);
+  Valid = OR(D0, or5);
 }
 
