@@ -49,3 +49,6 @@ output.py
 *.pyc
 __pycache__/
 
+# Outputs folder - all generated files
+outputs/
+

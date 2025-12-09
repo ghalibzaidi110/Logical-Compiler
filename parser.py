@@ -79,7 +79,7 @@ class Parser:
             peek = self.peek()
             raise SyntaxError(
                 f"Parse Error: Expected {type} but got {peek.type if peek else 'EOF'} "
-                f"at line {peek.line if peek else 'unknown'}"
+                f"at line {peek.line if peek else 'unknown'}, column {peek.column if peek else 'unknown'}"
             )
         return token
     
@@ -114,12 +114,31 @@ class Parser:
     
     def parse_identifier_list(self) -> List[str]:
         """Parse a comma-separated list of identifiers."""
-        identifiers = [self.expect('IDENTIFIER').value]
+        identifiers = [self.expect_identifier().value]
         
         while self.match('COMMA'):
-            identifiers.append(self.expect('IDENTIFIER').value)
+            identifiers.append(self.expect_identifier().value)
         
         return identifiers
+    
+    def expect_identifier(self) -> Token:
+        """Expect an identifier, provide helpful error if gate keyword found."""
+        token = self.match('IDENTIFIER')
+        if not token:
+            peek = self.peek()
+            if peek and peek.type == 'KEYWORD' and peek.value in ['AND', 'OR', 'XOR', 'NAND', 'NOR', 'NOT']:
+                raise SyntaxError(
+                    f"Parse Error at line {peek.line}, column {peek.column}: "
+                    f"Nested gate calls are not supported. "
+                    f"Found gate '{peek.value}' where an identifier was expected. "
+                    f"Please use intermediate WIRE variables instead of nesting gates like '{peek.value}(...)'."
+                )
+            else:
+                raise SyntaxError(
+                    f"Parse Error: Expected IDENTIFIER but got {peek.type if peek else 'EOF'} "
+                    f"at line {peek.line if peek else 'unknown'}, column {peek.column if peek else 'unknown'}"
+                )
+        return token
     
     def parse_gates(self) -> List[Gate]:
         """Parse zero or more gate assignments."""

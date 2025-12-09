@@ -6,6 +6,7 @@ Complete 6-phase compiler implementation.
 
 import sys
 import argparse
+import os
 from pathlib import Path
 
 from lexer import Lexer
@@ -174,10 +175,22 @@ def compile_file(input_file: str, output_file: str = None, verbose: bool = False
         
         # Save to file if specified
         if output_file:
-            with open(output_file, 'w') as f:
+            # Create outputs directory if it doesn't exist
+            outputs_dir = Path("outputs")
+            outputs_dir.mkdir(exist_ok=True)
+            
+            # If output_file is not an absolute path, save it in outputs folder
+            output_path = Path(output_file)
+            if not output_path.is_absolute():
+                output_path = outputs_dir / output_path.name
+            
+            # Ensure the directory exists (in case of nested paths)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(output_path, 'w') as f:
                 f.write(python_code)
-            print(f"\n[OK] Code saved to: {output_file}")
-            print(f"  Run with: python {output_file}")
+            print(f"\n[OK] Code saved to: {output_path}")
+            print(f"  Run with: python {output_path}")
         
         return 0
     

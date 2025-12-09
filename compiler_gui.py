@@ -247,9 +247,14 @@ class CompilerGUI:
             messagebox.showwarning("No Output", "No output to save. Please compile first.")
             return
         
+        # Create outputs directory if it doesn't exist
+        outputs_dir = Path("outputs")
+        outputs_dir.mkdir(exist_ok=True)
+        
         filename = filedialog.asksaveasfilename(
             title="Save Output",
             defaultextension=".txt",
+            initialdir=str(outputs_dir),
             filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
         )
         if filename:
@@ -279,9 +284,14 @@ class CompilerGUI:
         
         python_code = '\n'.join(python_lines)
         
+        # Create outputs directory if it doesn't exist
+        outputs_dir = Path("outputs")
+        outputs_dir.mkdir(exist_ok=True)
+        
         filename = filedialog.asksaveasfilename(
             title="Save Python Code",
             defaultextension=".py",
+            initialdir=str(outputs_dir),
             filetypes=[("Python Files", "*.py"), ("All Files", "*.*")]
         )
         if filename:
@@ -462,9 +472,14 @@ class CompilerGUI:
             output_text.config(state=tk.NORMAL)
             content = output_text.get('1.0', tk.END)
             output_text.config(state=tk.DISABLED)
+            # Create outputs directory if it doesn't exist
+            outputs_dir = Path("outputs")
+            outputs_dir.mkdir(exist_ok=True)
+            
             filename = filedialog.asksaveasfilename(
                 title="Save Execution Results",
                 defaultextension=".txt",
+                initialdir=str(outputs_dir),
                 filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")]
             )
             if filename:
