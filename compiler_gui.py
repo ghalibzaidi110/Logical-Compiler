@@ -642,20 +642,44 @@ class CompilerGUI:
             lexer = Lexer()
             self.tokens = lexer.tokenize(source_code)
             self.output_text_area.insert(tk.END, f"[OK] Phase 1 Complete ({len(self.tokens)} tokens)\n\n")
+            
+            # Show token details
+            self.output_text_area.insert(tk.END, "Token Stream:\n")
+            self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+            for i, token in enumerate(self.tokens, 1):
+                self.output_text_area.insert(tk.END, f"{i:3}. {token.type:15} = '{token.value}' (Line {token.line}, Col {token.column})\n")
+            self.output_text_area.insert(tk.END, "\n")
             self.phase_buttons['Lexer'].config(bg='#107c10')
             
             # Phase 2: Syntax Analysis
             self.output_text_area.insert(tk.END, "=" * 60 + "\n")
-            self.output_text_area.insert(tk.END, "Phase 2: Syntax Analysis\n")
+            self.output_text_area.insert(tk.END, "Phase 2: Syntax Analysis (LL(1) Parser)\n")
             self.output_text_area.insert(tk.END, "=" * 60 + "\n")
             self.root.update()
             
             parser = Parser(self.tokens)
             self.ast = parser.parse_program()
             self.output_text_area.insert(tk.END, f"[OK] Phase 2 Complete\n")
-            self.output_text_area.insert(tk.END, f"  Circuit: {self.ast.name}\n")
+            self.output_text_area.insert(tk.END, f"  Circuit Name: {self.ast.name}\n")
             self.output_text_area.insert(tk.END, f"  Declarations: {len(self.ast.declarations)}\n")
             self.output_text_area.insert(tk.END, f"  Gates: {len(self.ast.gates)}\n\n")
+            
+            # Show AST structure
+            self.output_text_area.insert(tk.END, "Abstract Syntax Tree (AST):\n")
+            self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+            self.output_text_area.insert(tk.END, f"Program({self.ast.name})\n")
+            
+            # Show declarations
+            for i, decl in enumerate(self.ast.declarations):
+                prefix = "├──" if i < len(self.ast.declarations) - 1 or len(self.ast.gates) > 0 else "└──"
+                self.output_text_area.insert(tk.END, f"{prefix} Declaration({decl.category}, {decl.identifiers})\n")
+            
+            # Show gates
+            for i, gate in enumerate(self.ast.gates):
+                prefix = "├──" if i < len(self.ast.gates) - 1 else "└──"
+                self.output_text_area.insert(tk.END, f"{prefix} Gate({gate.output} = {gate.gate_type}({', '.join(gate.inputs)}))\n")
+            
+            self.output_text_area.insert(tk.END, "\n")
             self.phase_buttons['Parser'].config(bg='#107c10')
             
             # Phase 3: Semantic Analysis
@@ -677,6 +701,17 @@ class CompilerGUI:
             self.symbol_table = semantic_result['symbol_table']
             self.output_text_area.insert(tk.END, f"[OK] Phase 3 Complete\n")
             self.output_text_area.insert(tk.END, f"  Symbol table entries: {len(self.symbol_table)}\n\n")
+            
+            # Show symbol table details
+            self.output_text_area.insert(tk.END, "Symbol Table:\n")
+            self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+            self.output_text_area.insert(tk.END, f"{'Name':<15} {'Category':<10} {'Defined':<8} {'Used By':<30}\n")
+            self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+            for name, info in self.symbol_table.items():
+                used_by = ', '.join(info.used_by) if info.used_by else 'None'
+                defined_str = 'Yes' if info.defined else 'No'
+                self.output_text_area.insert(tk.END, f"{name:<15} {info.category:<10} {defined_str:<8} {used_by:<30}\n")
+            self.output_text_area.insert(tk.END, "\n")
             self.phase_buttons['Semantic'].config(bg='#107c10')
             
             # Phase 4: Intermediate Code Generation
@@ -688,6 +723,16 @@ class CompilerGUI:
             icg = IntermediateCodeGenerator(self.ast)
             self.quads = icg.generate()
             self.output_text_area.insert(tk.END, f"[OK] Phase 4 Complete ({len(self.quads)} quadruples)\n\n")
+            
+            # Show quadruples
+            self.output_text_area.insert(tk.END, "Intermediate Code (Quadruples):\n")
+            self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+            self.output_text_area.insert(tk.END, f"{'No.':<5} {'Operation':<12} {'Arg1':<10} {'Arg2':<10} {'Result':<15}\n")
+            self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+            for i, quad in enumerate(self.quads, 1):
+                arg2 = quad.arg2 if quad.arg2 else '-'
+                self.output_text_area.insert(tk.END, f"{i:<5} {quad.op:<12} {str(quad.arg1):<10} {str(arg2):<10} {quad.result:<15}\n")
+            self.output_text_area.insert(tk.END, "\n")
             self.phase_buttons['ICG'].config(bg='#107c10')
             
             # Phase 5: Optimization
@@ -700,6 +745,25 @@ class CompilerGUI:
             self.optimized_quads = optimizer.optimize()
             removed = len(self.quads) - len(self.optimized_quads)
             self.output_text_area.insert(tk.END, f"[OK] Phase 5 Complete ({removed} instructions removed)\n\n")
+            
+            # Show optimization details
+            self.output_text_area.insert(tk.END, "Optimization Details:\n")
+            self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+            self.output_text_area.insert(tk.END, f"Before: {len(self.quads)} quadruples\n")
+            self.output_text_area.insert(tk.END, f"After:  {len(self.optimized_quads)} quadruples\n")
+            self.output_text_area.insert(tk.END, f"Removed: {removed} instructions\n\n")
+            
+            if removed > 0:
+                self.output_text_area.insert(tk.END, "Optimized Quadruples:\n")
+                self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+                self.output_text_area.insert(tk.END, f"{'No.':<5} {'Operation':<12} {'Arg1':<10} {'Arg2':<10} {'Result':<15}\n")
+                self.output_text_area.insert(tk.END, "-" * 60 + "\n")
+                for i, quad in enumerate(self.optimized_quads, 1):
+                    arg2 = quad.arg2 if quad.arg2 else '-'
+                    self.output_text_area.insert(tk.END, f"{i:<5} {quad.op:<12} {str(quad.arg1):<10} {str(arg2):<10} {quad.result:<15}\n")
+            else:
+                self.output_text_area.insert(tk.END, "No optimizations applied (code already optimal)\n")
+            self.output_text_area.insert(tk.END, "\n")
             self.phase_buttons['Optimize'].config(bg='#107c10')
             
             # Phase 6: Code Generation
