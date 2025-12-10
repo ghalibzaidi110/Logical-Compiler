@@ -108,10 +108,9 @@ if __name__ == "__main__":
     CIRCUIT Test {
         INPUT A;
         OUTPUT Z;
-        WIRE temp1, temp2;
-        temp1 = AND(A, 0);
-        temp2 = OR(temp1, 0);
-        Z = temp2;
+        WIRE temp1;
+        temp1 = AND(A, A);
+        Z = OR(temp1, temp1);
     }
     """
     
